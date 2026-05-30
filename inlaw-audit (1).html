@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inlaw — AI Visibility Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0F172A;
+    --body: #334155;
+    --muted: #64748B;
+    --faint: #94A3B8;
+    --paper: #FFFFFF;
+    --panel: #F8FAFC;
+    --panel-border: #E2E8F0;
+    --brand: #7C3AED;
+    --brand-soft: #F3E8FF;
+    --brand-ink: #5B21B6;
+    --bad: #DC2626;
+    --bad-soft: #FEE2E2;
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+
+  html, body {
+    font-family: var(--sans);
+    background: #1a1a2e;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  body {
+    padding: 24px 0;
+    min-height: 100vh;
+  }
+
+  .deck {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 0 12px;
+  }
+
+  .slide {
+    background: var(--paper);
+    border-radius: 20px;
+    padding: 36px 28px;
+    margin-bottom: 20px;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide.dark {
+    background: var(--ink);
+    color: white;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--brand);
+    margin-bottom: 12px;
+  }
+
+  .slide.dark .eyebrow { color: var(--brand); }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+
+  .slide.dark h1 { color: white; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    font-size: 15px;
+    color: var(--body);
+    margin-bottom: 12px;
+  }
+
+  .slide.dark p { color: var(--faint); }
+
+  /* COVER */
+  .cover .brand-mark {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 60px;
+  }
+  .cover .brand-dot {
+    width: 10px; height: 10px;
+    background: var(--brand);
+    border-radius: 50%;
+  }
+  .cover .brand-name {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: white;
+  }
+  .cover .prepared {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: var(--faint);
+    margin-bottom: 8px;
+  }
+  .cover .for-name {
+    font-family: var(--serif);
+    font-size: 44px;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .cover .firm {
+    font-size: 16px;
+    color: var(--faint);
+    margin-bottom: 28px;
+  }
+  .cover .divider {
+    width: 40px; height: 3px;
+    background: var(--brand);
+    margin-bottom: 24px;
+  }
+  .cover .headline {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 40px;
+  }
+  .cover .contact-card {
+    margin-top: auto;
+    background: rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .cover .contact-card .label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--brand);
+    margin-bottom: 6px;
+  }
+  .cover .contact-card .name {
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 2px;
+  }
+  .cover .contact-card .url {
+    font-size: 12px;
+    color: var(--faint);
+  }
+
+  /* CRITICAL FINDING BOX */
+  .finding {
+    background: var(--bad-soft);
+    border: 2px solid var(--bad);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 28px;
+  }
+  .finding .tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--bad);
+    margin-bottom: 12px;
+  }
+  .finding .statement {
+    font-size: 17px;
+    color: var(--ink);
+    line-height: 1.4;
+    margin-bottom: 14px;
+  }
+  .finding code {
+    font-family: var(--mono);
+    font-weight: 600;
+    background: rgba(220,38,38,0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  .finding .explainer {
+    font-size: 13px;
+    color: var(--body);
+    line-height: 1.5;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  /* IMPACT LIST */
+  .impact-list {
+    list-style: none;
+  }
+  .impact-list li {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+  .impact-list .dot {
+    flex-shrink: 0;
+    width: 8px; height: 8px;
+    background: var(--bad);
+    border-radius: 50%;
+    margin-top: 7px;
+  }
+  .impact-list li span {
+    font-size: 14px;
+    color: var(--body);
+    line-height: 1.5;
+  }
+
+  /* COMPETITOR GRID */
+  .competitors {
+    background: var(--bad-soft);
+    border: 1.5px solid var(--bad);
+    border-radius: 12px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 18px;
+    margin-bottom: 24px;
+  }
+  .competitor .name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .competitor .desc {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* QUOTE CALLOUT */
+  .quote {
+    border-left: 3px solid var(--brand);
+    padding: 6px 0 6px 16px;
+    margin-top: auto;
+  }
+  .quote p {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; gap: 14px; }
+  .step {
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 56px 1fr;
+  }
+  .step .num {
+    background: var(--ink);
+    color: white;
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step .body {
+    padding: 18px;
+  }
+  .step h3 {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+  .step p {
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* CTA SLIDE */
+  .cta .lets-talk {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--brand);
+    margin-bottom: 16px;
+  }
+  .cta h1 {
+    color: white;
+    margin-bottom: 32px;
+  }
+  .cta .points {
+    list-style: none;
+    margin-bottom: 32px;
+  }
+  .cta .points li {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+    color: white;
+    font-size: 14px;
+  }
+  .cta .points .dash {
+    width: 16px; height: 2px;
+    background: var(--brand);
+    flex-shrink: 0;
+  }
+  .cta .contact-card {
+    margin-top: auto;
+    border: 1px solid var(--brand);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .cta .contact-card .name {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 6px;
+  }
+  .cta .contact-card .meta {
+    font-size: 12px;
+    color: var(--faint);
+    margin-bottom: 16px;
+  }
+  .cta .contact-card .book {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--brand);
+    text-decoration: none;
+  }
+  .cta .contact-card .book:hover { color: white; }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 28px;
+    padding-top: 14px;
+    border-top: 1px solid var(--panel-border);
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--faint);
+  }
+
+  /* HINT */
+  .hint {
+    text-align: center;
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    margin: 24px 0 8px;
+    letter-spacing: 1px;
+  }
+  .hint .arrow { animation: bounce 2s infinite; display: inline-block; }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
+  }
+
+  @media (max-width: 440px) {
+    .deck { padding: 0 8px; }
+    .slide { padding: 30px 22px; min-height: 580px; }
+    h1 { font-size: 26px; }
+    .cover .for-name { font-size: 38px; }
+    .cover .headline { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- SLIDE 1 — COVER -->
+  <section class="slide dark cover">
+    <div class="brand-mark">
+      <div class="brand-dot"></div>
+      <div class="brand-name">AI VISIBILITY LAB</div>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+      <div class="prepared">PREPARED FOR</div>
+      <div class="for-name">Carlyon</div>
+      <div class="firm">Inlaw</div>
+      <div class="divider"></div>
+      <div class="headline">Why Inlaw is invisible to AI search — and how to fix it</div>
+    </div>
+    <div class="contact-card">
+      <div class="label">AI VISIBILITY LAB</div>
+      <div class="name">Amanda Chu</div>
+      <div class="url">aivislab.org</div>
+    </div>
+  </section>
+
+  <div class="hint">Scroll to continue <span class="arrow">↓</span></div>
+
+  <!-- SLIDE 2 — PROBLEM -->
+  <section class="slide">
+    <div class="eyebrow">The Problem</div>
+    <h1>inlaw.au is blocking search engines</h1>
+
+    <div class="finding">
+      <div class="tag">CRITICAL FINDING</div>
+      <div class="statement">Your homepage HTML contains <code>meta-robots: noindex, nofollow</code></div>
+      <div class="explainer">This single line of code tells Google, Bing, ChatGPT and every AI crawler: do not index this site, do not follow links from it. Inlaw is invisible to search by instruction — not by chance.</div>
+    </div>
+
+    <div class="section-label">WHAT THIS MEANS</div>
+    <ul class="impact-list">
+      <li><span class="dot"></span><span>Zero organic Google traffic since launch in 2024</span></li>
+      <li><span class="dot"></span><span>AI Overviews, ChatGPT and Perplexity cannot cite Inlaw</span></li>
+      <li><span class="dot"></span><span>Your strongest proof — testimonials, named clients, the platform model — never reaches a buyer doing research</span></li>
+    </ul>
+
+    <div class="footer">
+      <span>Inlaw · AI Visibility Audit</span>
+      <span>02 / 05</span>
+    </div>
+  </section>
+
+  <!-- SLIDE 3 — COST -->
+  <section class="slide">
+    <div class="eyebrow">What It's Costing You</div>
+    <h1>Your competitors are filling the gap</h1>
+
+    <p style="font-size: 14px; margin-bottom: 20px;">SME founders asking AI for "fractional general counsel Australia" today see these names — not yours:</p>
+
+    <div class="competitors">
+      <div class="competitor"><div class="name">Envision Legal</div><div class="desc">$2,500/mo · Sydney</div></div>
+      <div class="competitor"><div class="name">Click Legal</div><div class="desc">Subscription · ASIC focus</div></div>
+      <div class="competitor"><div class="name">BU Lawyers</div><div class="desc">Melbourne · risk lean</div></div>
+      <div class="competitor"><div class="name">Keily McCrosson</div><div class="desc">Subscription · M&A</div></div>
+      <div class="competitor"><div class="name">FirstCounsel</div><div class="desc">Startups · project-based</div></div>
+      <div class="competitor"><div class="name">External Lawyers</div><div class="desc">Retail / hospitality</div></div>
+    </div>
+
+    <div class="quote">
+      <p>Your product is arguably stronger — dedicated lawyer, document portal, named SME clients. None of it reaches the buyer because the website tells search engines to ignore it.</p>
+    </div>
+
+    <div class="footer">
+      <span>Inlaw · AI Visibility Audit</span>
+      <span>03 / 05</span>
+    </div>
+  </section>
+
+  <!-- SLIDE 4 — FIX -->
+  <section class="slide">
+    <div class="eyebrow">The Fix</div>
+    <h1>Three steps to get Inlaw cited</h1>
+
+    <div class="steps">
+      <div class="step">
+        <div class="num">01</div>
+        <div class="body">
+          <h3>Unblock the site</h3>
+          <p>Remove the noindex directive. Rewrite title tags and meta descriptions. Add Schema.org LegalService markup. Days, not months.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <div class="body">
+          <h3>Make Inlaw answer-ready</h3>
+          <p>Publish fractional GC explainers. Build use-case pages per segment. Surface client proof at page level so AI tools can quote it.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <div class="body">
+          <h3>Earn AI citations</h3>
+          <p>Reinforce entity signals across platforms. Earn references in legal-tech coverage. Align wording to how SME founders actually search.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Inlaw · AI Visibility Audit</span>
+      <span>04 / 05</span>
+    </div>
+  </section>
+
+  <!-- SLIDE 5 — CTA -->
+  <section class="slide dark cta">
+    <div class="brand-mark">
+      <div class="brand-dot"></div>
+      <div class="brand-name">AI VISIBILITY LAB</div>
+    </div>
+
+    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+      <div class="lets-talk">LET'S TALK</div>
+      <h1>15 minutes. I'll walk you through what I found.</h1>
+
+      <ul class="points">
+        <li><div class="dash"></div>Live demo of how Inlaw appears across AI tools</li>
+        <li><div class="dash"></div>The 60-minute technical fix that unlocks indexing</li>
+        <li><div class="dash"></div>Where competitors are winning the answers</li>
+      </ul>
+    </div>
+
+    <div class="contact-card">
+      <div class="name">Amanda Chu</div>
+      <div class="meta">AI Visibility Lab · aivislab.org</div>
+      <a href="#" class="book">Book a 15-min discovery call →</a>
+    </div>
+  </section>
+
+  <div class="hint" style="margin-bottom: 32px;">— end —</div>
+
+</div>
+
+</body>
+</html>
